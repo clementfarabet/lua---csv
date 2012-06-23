@@ -46,10 +46,10 @@ do
    local Csv = torch.class("csv.File")
 
    -- initializer
-   function Csv:__init(filepath, mode, char)
+   function Csv:__init(filepath, mode, separator)
       local msg = nil
       self.file, msg = io.open(filepath, mode)
-      self.separator = char or ','
+      self.separator = separator or ','
       if not self.file then error(msg) end
    end
 
@@ -119,6 +119,7 @@ do
    function fromcsv(s, separator)
       if not s then error("s is null") end
       s = s .. separator -- end with separator
+      if separator == ' ' then separator = '%s+' end
       local t = {}
       local fieldstart = 1
       repeat
