@@ -78,7 +78,7 @@ do
       local all = self.file:read("*all")
       local res = {}
       for line in string.gmatch(all, "([^\n]*)\n") do
-	 res[#res+1] = fromcsv(line, self.separator)
+         res[#res+1] = fromcsv(line, self.separator)
       end
       return res
    end
@@ -100,7 +100,7 @@ do
    function tocsv(t, separator)
       local s = ""
       for _,p in pairs(t) do
-	 s = s .. separator .. escapeCsv(p, separator)
+         s = s .. separator .. escapeCsv(p, separator)
       end
       return string.sub(s, 2) -- remove first comma
    end
@@ -110,7 +110,7 @@ do
    function escapeCsv(s, separator)
       if string.find(s, '["' .. separator .. ']') then
       --if string.find(s, '[,"]') then
-	 s = '"' .. string.gsub(s, '"', '""') .. '"'
+         s = '"' .. string.gsub(s, '"', '""') .. '"'
       end
       return s
    end
@@ -122,23 +122,23 @@ do
       local t = {}
       local fieldstart = 1
       repeat
-	 -- next field is quoted? (starts with "?)
-	 if string.find(s, '^"', fieldstart) then
-	    local a, c
-	    local i = fieldstart
-	    repeat
-	       -- find closing quote
-	       a, i, c = string.find(s, '"("?)', i+1)
-	    until c ~= '"'  -- quote not followed by quote?
-	    if not i then error('unmatched "') end
-	    local f = string.sub(s, fieldstart+1, i-1)
-	    table.insert(t, (string.gsub(f, '""', '"')))
-	    fieldstart = string.find(s, separator, i) + 1
-	 else
-	    local nexti = string.find(s, separator, fieldstart)
-	    table.insert(t, string.sub(s, fieldstart, nexti-1))
-	    fieldstart = nexti + 1
-	 end
+         -- next field is quoted? (starts with "?)
+         if string.find(s, '^"', fieldstart) then
+            local a, c
+            local i = fieldstart
+            repeat
+               -- find closing quote
+               a, i, c = string.find(s, '"("?)', i+1)
+            until c ~= '"'  -- quote not followed by quote?
+            if not i then error('unmatched "') end
+            local f = string.sub(s, fieldstart+1, i-1)
+            table.insert(t, (string.gsub(f, '""', '"')))
+            fieldstart = string.find(s, separator, i) + 1
+         else
+            local nexti = string.find(s, separator, fieldstart)
+            table.insert(t, string.sub(s, fieldstart, nexti-1))
+            fieldstart = nexti + 1
+         end
       until fieldstart > string.len(s)
       return t
    end
