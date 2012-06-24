@@ -11,20 +11,8 @@
 -- Ref:
 -- http://www.lua.org/pil/20.4.html
 -- http://www.torch.ch/manual/torch/utility#torchclass
-
 ----------------------------------------------------------------------
 
--- static method
--- convert an array of strings or numbers into a row in a csv file
-local function tocsv(t, separator)
-   local s = ""
-   for _,p in pairs(t) do
-      s = s .. separator .. escapeCsv(p, separator)
-   end
-   return string.sub(s, 2) -- remove first comma
-end
-
--- private 
 -- enclose commas and quotes between quotes and escape original quotes
 local function escapeCsv(s, separator)
    if string.find(s, '["' .. separator .. ']') then
@@ -32,6 +20,15 @@ local function escapeCsv(s, separator)
       s = '"' .. string.gsub(s, '"', '""') .. '"'
    end
    return s
+end
+
+-- convert an array of strings or numbers into a row in a csv file
+local function tocsv(t, separator)
+   local s = ""
+   for _,p in pairs(t) do
+      s = s .. separator .. escapeCsv(p, separator)
+   end
+   return string.sub(s, 2) -- remove first comma
 end
 
 -- break record from csv file into array of strings

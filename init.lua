@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------
 --
--- Copyright (c) 2012 Roy Lawrence, Clement Farabet
+-- Copyright (c) 2012 Roy Lowrance, Clement Farabet
 -- 
 -- Permission is hereby granted, free of charge, to any person obtaining
 -- a copy of this software and associated documentation files (the
@@ -26,8 +26,9 @@
 --     csv - a little package to handle CSV files (read/write)
 --
 -- history: 
---     June 23, 2012 - made a pkg, and high-level functions - C.Farabet
---     June 1, 2012  - csv.File class - R. Lawrence
+--     June 24, 2012 - create a complete API to make queries - C. Farabet
+--     June 23, 2012 - made a pkg, and high-level functions - C. Farabet
+--     June 1, 2012  - csv.File class - R. Lowrance
 ----------------------------------------------------------------------
 
 require 'torch'
@@ -167,6 +168,15 @@ function csv.load(...)
          else
             -- query has this form: 
             -- { var1 = {'value1', 'value2'}, var2 = {'value1'} }
+            -- OR
+            -- { var1 = 'value1', var2 = 'value2'}
+            -- convert second form into first one:
+            for var,vals in pairs(varvals) do
+               if type(vals) ~= 'table' then
+                  varvals[var] = {vals}
+               end
+            end
+            -- find all indices that are ok
             local indices = {}
             if query == 'union' then
                for var,vals in pairs(varvals) do
@@ -241,7 +251,7 @@ function csv.save(...)
       {arg='path',      type='string',  help='path to file', req=true},
       {arg='data',      type='table',   help='table to save as a CSV file', req=true},
       {arg='separator', type='string',  help='separator (one character)', default=','},
-      {arg='mode',      type='string',  help='table to save is represented as: raw | tidy | query', default='tidy'},
+      {arg='mode',      type='string',  help='table to save is represented as: raw | tidy | query', default='autodetect'},
       {arg='header',    type='boolean', help='table has a header (variable names)', default=true},
       {arg='verbose',   type='boolean', help='verbose load', default=true}
    )
@@ -249,6 +259,69 @@ function csv.save(...)
    -- check path
    path = path:gsub('^~',os.getenv('HOME'))
 
-   -- ...
-   error('not implemented yet')
+   -- verbose print
+   local function vprint(...) if verbose then print('<csv>',...) end end
+
+   -- save CSV
+   vprint('writing to file: ' .. path)
+   local f = csv.File(path,'w',separator)
+
+   -- autodetect mode?
+   if mode == 'autodetect' then
+      if type(data) == 'function' then
+         mode = 'query'
+      elseif type(data) == 'table' then
+         if #data == 0 then
+            mode = 'tidy'
+         else
+            mode = 'raw'
+         end
+      else
+         error('cannot autodetect mode, incorrect data type')
+      end
+   end
+
+   -- do work depending on mode
+   if mode == 'raw' then
+      -- simple, just write table
+      f:writeall(data)
+      vprint('writing done')
+
+   elseif mode == 'tidy' or mode == 'query' then
+      -- query mode?
+      if mode == 'query' then
+         -- query all data:
+         vprint('generating tidy table')
+         data = data('all')
+      end
+      -- 'data' is a tidy table, export to raw mode
+      vprint('exporting tidy table to raw CSV')
+      local raw = {}
+      -- use headers?
+      local headers
+      if header then
+         headers = {}
+         for var in pairs(data) do
+            table.insert(headers, var)
+         end
+      end
+      -- export data
+      for var,vals in pairs(data) do
+         for i,val in ipairs(vals) do
+            raw[i] = raw[i] or {}
+            table.insert(raw[i], val)
+         end
+      end
+      -- write raw data
+      if headers then f:write(headers) end
+      f:writeall(raw)
+      vprint('writing done')
+
+   else
+      print(args.usage)
+      error('unknown mode')
+   end
+
+   -- done
+   f:close()
 end
