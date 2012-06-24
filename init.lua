@@ -132,10 +132,10 @@ function csv.load(...)
             {...},
             'query',
             'This closure was automatically generated to query your data.\n'
-            .. 'Example of query: query({var1={1}, var2={2,3,4}}, \'union\')\n'
+            .. 'Example of query: query(\'union\', {var1={1}, var2={2,3,4}})\n'
             .. 'this query will return a subset of the original data, where var1 = 1 OR var2 = 2 or 3 or 4 \n'
             .. '\n'
-            .. 'Other example of query: query({var1={1}, var2={2,3,4}}, \'inter\')\n'
+            .. 'Other example of query: query(\'inter\', {var1={1}, var2={2,3,4}})\n'
             .. 'this query will return a subset of the original data, where var1 = 1 AND var2 = 2 or 3 or 4 \n'
             .. '\n'
             .. 'Other example of query: query(\'vars\')\n'
