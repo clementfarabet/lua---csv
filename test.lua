@@ -35,24 +35,24 @@ end
 
 
 -- test writing file
-function writeRecs(csv)
-   csv:write({"a","b","c"})
-   csv:write({01, 02, 03})
-   csv:write({11, 12, 13})
+function writeRecs(csvf)
+   csvf:write({"a","b","c"})
+   csvf:write({01, 02, 03})
+   csvf:write({11, 12, 13})
 end
 
-csv = csv.File(tempfilename, "w")
-writeRecs(csv)
-csv:close()
+csvf = csv.File(tempfilename, "w")
+writeRecs(csvf)
+csvf:close()
 
 
 -- test reading same file line by line
 function readRecs(csv)
-   row = csv:read()
+   row = csvf:read()
    testequalarray(row, {"a","b","c"})
    datarownum = 0
    while true do
-      local row = csv:read()
+      local row = csvf:read()
       if not row then break end
       datarownum = datarownum + 1
       if datarownum == 1 then
@@ -63,27 +63,27 @@ function readRecs(csv)
    end
 end
 
-csv = csv.File(tempfilename, "r")
-readRecs(csv)
-csv:close()
+csvf = csv.File(tempfilename, "r")
+readRecs(csvf)
+csvf:close()
 
 -- read same file all at once
-csv = csv.File(tempfilename, "r")
-lines = csv:readall()
-csv:close()
+csvf = csv.File(tempfilename, "r")
+lines = csvf:readall()
+csvf:close()
 testequalarray(lines[1], {"a","b","c"})
 testequalarray(lines[2], {"1", "2", "3"})
 testequalarray(lines[3], {"11", "12", "13"})
 
 -- test using a | instead of , as a separator
-csv = csv.File(tempfilename, "w", "|")
-writeRecs(csv)
-csv:close()
+csvf = csv.File(tempfilename, "w", "|")
+writeRecs(csvf)
+csvf:close()
 
 -- now read the records
-csv = csv.File(tempfilename, "r", "|")
-readRecs(csv)
-csv:close()
+csvf = csv.File(tempfilename, "r", "|")
+readRecs(csvf)
+csvf:close()
 
 os.execute("rm " .. tempfilename)
 
