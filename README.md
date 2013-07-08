@@ -3,18 +3,10 @@
 ## Install:
 
 First install Torch7 (www.torch.ch) then simply install this package
-using torch-pkg:
+using torch-rocks:
 
 ```
-torch-pkg install csv
-```
-
-or from the sources:
-
-```
-torch-pkg download csv
-cd csv
-torch-pkg deploy
+torch-rocks install csv
 ```
 
 ## Use:
