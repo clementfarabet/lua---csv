@@ -23,35 +23,35 @@
 -- 
 ----------------------------------------------------------------------
 -- description:
---     csv - a little package to handle CSV files (read/write)
+--     csvigo - a little package to handle CSV files (read/write)
 --
 -- history: 
 --     June 24, 2012 - create a complete API to make queries - C. Farabet
 --     June 23, 2012 - made a pkg, and high-level functions - C. Farabet
---     June 1, 2012  - csv.File class - R. Lowrance
+--     June 1, 2012  - csvigo.File class - R. Lowrance
 ----------------------------------------------------------------------
 
 require 'torch'
 require 'dok'
 
 -- create global nnx table:
-csv = {}
+csvigo = {}
 
--- csv.File manager:
-torch.include('csv', 'File.lua')
+-- csvigo.File manager:
+torch.include('csvigo', 'File.lua')
 
 ----------------------------------------------------------------------
 
 -- functional API: simple shortcuts to serialize data using CSV files
 -- this API is similar to the image.load/save, where the user doens't
--- have to create a csv.File object, and handle it later on.
+-- have to create a csvigo.File object, and handle it later on.
 
 -- load
-function csv.load(...)
+function csvigo.load(...)
    -- usage
    local args, path, separator, mode, header, verbose = dok.unpack(
       {...},
-      'csv.load',
+      'csvigo.load',
       'Load a CSV file, according to the specifided mode:\n'
       .. ' - raw   : no clean up, return a raw list of lists, a 1-to-1 mapping to the CSV file\n'
       .. ' - tidy  : return a clean table, where each entry is a variable that points to its values\n'
@@ -71,7 +71,7 @@ function csv.load(...)
 
    -- load CSV
    vprint('parsing file: ' .. path)
-   local f = csv.File(path,'r',separator)
+   local f = csvigo.File(path,'r',separator)
    local loaded = f:readall()
    f:close()
 
@@ -239,11 +239,11 @@ function csv.load(...)
 end
 
 -- load
-function csv.save(...)
+function csvigo.save(...)
    -- usage
    local args, path, data, separator, mode, header, verbose = dok.unpack(
       {...},
-      'csv.save',
+      'csvigo.save',
       'Load a CSV file, according to the specifided mode:\n'
       .. ' - raw   : no clean up, return a raw list of lists, a 1-to-1 mapping to the CSV file\n'
       .. ' - tidy  : return a clean table, where each entry is a variable that points to its values\n'
@@ -264,7 +264,7 @@ function csv.save(...)
 
    -- save CSV
    vprint('writing to file: ' .. path)
-   local f = csv.File(path,'w',separator)
+   local f = csvigo.File(path,'w',separator)
 
    -- autodetect mode?
    if mode == 'autodetect' then

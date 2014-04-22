@@ -5,4 +5,4 @@ FIND_PACKAGE(Torch REQUIRED)
 
 SET(luasrc init.lua File.lua)
 
-ADD_TORCH_PACKAGE(csv "" "${luasrc}" "Image Processing")
+ADD_TORCH_PACKAGE(csvigo "" "${luasrc}" "CSV Reader/Writer")
