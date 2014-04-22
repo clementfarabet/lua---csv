@@ -1,4 +1,4 @@
-# csv: a package to handle CSV files (read and write).
+# csvigo: a package to handle CSV files (read and write).
 
 ## Install:
 
@@ -6,17 +6,17 @@ First install Torch7 (www.torch.ch) then simply install this package
 using torch-rocks:
 
 ```
-torch-rocks install csv
+luarocks install csvigo
 ```
 
 ## Use:
 
-The library provides 2 high-level functions: csv.load and csv.save. To get help
+The library provides 2 high-level functions: csvigo.load and csvigo.save. To get help
 on these functions, simply do:
 
 ```
-> help(csv.save)
-> help(csv.load)
+> help(csvigo.save)
+> help(csvigo.load)
 ```
 
 Loading a CSV file in 'query' mode gives you a convenient query function that
@@ -24,7 +24,7 @@ you can use to query subsets of your original CSV file. To get help on this quer
 function, simply do:
 
 ```
-> query = csv.load{path='somefile.csv', mode='query'}
+> query = csvigo.load{path='somefile.csv', mode='query'}
 > query('help')
 -- print some help
 > all = query('all')

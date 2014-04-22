@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- csv.File
+-- csvigo.File
 
 -- A class to manage comma separate value files + two directly-usable functions
 -- various function to manage csv files
@@ -63,7 +63,7 @@ end
 ----------------------------------------------------------------------
 
 -- create class Csv
-local Csv = torch.class("csv.File")
+local Csv = torch.class("csvigo.File")
 
 -- initializer
 function Csv:__init(filepath, mode, separator)
