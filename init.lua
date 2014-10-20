@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------
 --
 -- Copyright (c) 2012 Roy Lowrance, Clement Farabet
--- 
+--
 -- Permission is hereby granted, free of charge, to any person obtaining
 -- a copy of this software and associated documentation files (the
 -- "Software"), to deal in the Software without restriction, including
@@ -9,10 +9,10 @@
 -- distribute, sublicense, and/or sell copies of the Software, and to
 -- permit persons to whom the Software is furnished to do so, subject to
 -- the following conditions:
--- 
+--
 -- The above copyright notice and this permission notice shall be
 -- included in all copies or substantial portions of the Software.
--- 
+--
 -- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 -- EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 -- MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -20,12 +20,12 @@
 -- LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 -- OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 -- WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
--- 
+--
 ----------------------------------------------------------------------
 -- description:
 --     csvigo - a little package to handle CSV files (read/write)
 --
--- history: 
+-- history:
 --     June 24, 2012 - create a complete API to make queries - C. Farabet
 --     June 23, 2012 - made a pkg, and high-level functions - C. Farabet
 --     June 1, 2012  - csvigo.File class - R. Lowrance
@@ -49,7 +49,7 @@ torch.include('csvigo', 'File.lua')
 -- load
 function csvigo.load(...)
    -- usage
-   local args, path, separator, mode, header, verbose = dok.unpack(
+   local args, path, separator, mode, header, verbose, skip = dok.unpack(
       {...},
       'csvigo.load',
       'Load a CSV file, according to the specifided mode:\n'
@@ -60,7 +60,8 @@ function csvigo.load(...)
       {arg='separator', type='string',  help='separator (one character)', default=','},
       {arg='mode',      type='string',  help='load mode: raw | tidy | query', default='tidy'},
       {arg='header',    type='boolean', help='file has a header (variable names)', default=true},
-      {arg='verbose',   type='boolean', help='verbose load', default=true}
+      {arg='verbose',   type='boolean', help='verbose load', default=true},
+      {arg='skip',      type='number',  help='skip this many lines at start of file', default=0}
    )
 
    -- check path
@@ -87,14 +88,14 @@ function csvigo.load(...)
       local tidy = {}
       local i2key = {}
       -- header?
-      local start = 1
+      local start = 1 + skip
       if header then
          -- use header names
-         i2key = loaded[1]
-         start = 2
+         i2key = loaded[start]
+         start = start + 1
       else
          -- generate names
-         for i = 1,#loaded[1] do
+         for i = 1,#loaded[start] do
             i2key[i] = 'var_'..i
          end
       end
@@ -166,7 +167,7 @@ function csvigo.load(...)
             return tidy
 
          else
-            -- query has this form: 
+            -- query has this form:
             -- { var1 = {'value1', 'value2'}, var2 = {'value1'} }
             -- OR
             -- { var1 = 'value1', var2 = 'value2'}
