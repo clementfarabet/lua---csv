@@ -183,9 +183,11 @@ function csvigo.load(...)
                for var,vals in pairs(varvals) do
                   for _,val in ipairs(vals) do
                      local found = revidx[var][tostring(val)]
-                     for _,idx in ipairs(found) do
-                        table.insert(indices, idx)
-                     end
+		     if found ~= nil then
+			for _,idx in ipairs(found) do
+			   table.insert(indices, idx)
+			end
+		     end
                   end
                end
             else -- 'inter'
