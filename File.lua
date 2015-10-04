@@ -95,9 +95,10 @@ end
 -- each element of the array is an array of strings
 -- should be faster than reading record by record
 function Csv:readall()
-   local all = self.file:read("*all")
    local res = {}
-   for line in string.gmatch(all, "([^\n]*)\n") do
+   while true do
+      local line = self.file:read("*l")
+      if not line then break end
       res[#res+1] = fromcsv(line, self.separator)
    end
    return res
