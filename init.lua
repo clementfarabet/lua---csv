@@ -328,3 +328,5 @@ function csvigo.save(...)
    -- done
    f:close()
 end
+
+return csvigo
