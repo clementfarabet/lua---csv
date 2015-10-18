@@ -88,6 +88,8 @@ end
 function Csv:read() 
    local line = self.file:read()
    if not line then return nil end
+   -- strip CR line endings
+   line = line:gsub('\r', '')
    return fromcsv(line, self.separator)
 end
 
@@ -99,6 +101,8 @@ function Csv:readall()
    while true do
       local line = self.file:read("*l")
       if not line then break end
+      -- strip CR line endings
+      line = line:gsub('\r', '')
       res[#res+1] = fromcsv(line, self.separator)
    end
    return res
