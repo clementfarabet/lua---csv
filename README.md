@@ -29,6 +29,7 @@ function, simply do:
 -- print some help
 > all = query('all')
 > subset = query('union', {somevar=someval, someothervar={val1, val2}})
+```
 
 ## Large CSV mode
 
