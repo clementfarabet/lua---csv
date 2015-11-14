@@ -85,7 +85,7 @@ end
 
 -- return next record from the csv file
 -- return nill if at end of file
-function Csv:read() 
+function Csv:read()
    local line = self.file:read()
    if not line then return nil end
    -- strip CR line endings
@@ -93,17 +93,41 @@ function Csv:read()
    return fromcsv(line, self.separator)
 end
 
+local tds
+local function table2tdshash(t)
+    local h = tds.Hash()
+    for k,v in pairs(t) do
+        h[k] = v
+    end
+    return h
+end
+
 -- return all records as an array
 -- each element of the array is an array of strings
 -- should be faster than reading record by record
-function Csv:readall()
-   local res = {}
+function Csv:readall(large)
+   local res
+   if large then
+       local ok, tds_ = pcall(require, 'tds')
+       if not ok then
+           error('large mode requires the tds package. '
+                     .. 'Install it via "luarocks install tds"')
+       end
+       tds = tds_
+       res = tds.Vec()
+   else
+       res = {}
+   end
    while true do
       local line = self.file:read("*l")
       if not line then break end
       -- strip CR line endings
       line = line:gsub('\r', '')
-      res[#res+1] = fromcsv(line, self.separator)
+      local entry = fromcsv(line, self.separator)
+      if large then
+          entry = table2tdshash(entry)
+      end
+      res[#res+1] = entry
    end
    return res
 end

@@ -49,7 +49,7 @@ torch.include('csvigo', 'File.lua')
 -- load
 function csvigo.load(...)
    -- usage
-   local args, path, separator, mode, header, verbose, skip = dok.unpack(
+   local args, path, separator, mode, header, verbose, skip, large = dok.unpack(
       {...},
       'csvigo.load',
       'Load a CSV file, according to the specifided mode:\n'
@@ -61,7 +61,8 @@ function csvigo.load(...)
       {arg='mode',      type='string',  help='load mode: raw | tidy | query', default='tidy'},
       {arg='header',    type='boolean', help='file has a header (variable names)', default=true},
       {arg='verbose',   type='boolean', help='verbose load', default=true},
-      {arg='skip',      type='number',  help='skip this many lines at start of file', default=0}
+      {arg='skip',      type='number',  help='skip this many lines at start of file', default=0},
+      {arg='large',     type='boolean', help='Set to true when loading large files', default=false}
    )
 
    -- check path
@@ -73,7 +74,7 @@ function csvigo.load(...)
    -- load CSV
    vprint('parsing file: ' .. path)
    local f = csvigo.File(path,'r',separator)
-   local loaded = f:readall()
+   local loaded = f:readall(large)
    f:close()
 
    -- do work depending on mode
