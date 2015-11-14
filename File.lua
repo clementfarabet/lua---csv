@@ -68,6 +68,7 @@ local Csv = torch.class("csvigo.File")
 -- initializer
 function Csv:__init(filepath, mode, separator)
    local msg = nil
+   self.filepath = filepath
    self.file, msg = io.open(filepath, mode)
    self.separator = separator or ','
    if not self.file then error(msg) end
@@ -93,40 +94,124 @@ function Csv:read()
    return fromcsv(line, self.separator)
 end
 
-local tds
-local function table2tdshash(t)
-    local h = tds.Hash()
-    for k,v in pairs(t) do
-        h[k] = v
+function Csv:largereadall()
+    local ok = pcall(require, 'torch')
+    if not ok then
+        error('large mode needs the torch package')
     end
-    return h
+    local libcsvigo = require 'libcsvigo'
+    local ffi = require 'ffi'
+    local path = self.filepath
+    local f = torch.DiskFile(path, 'r'):binary()
+    f:seekEnd()
+    local length = f:position() - 1
+    f:seek(1)
+    local data = f:readChar(length)
+    f:close()
+
+    -- now that the ByteStorage is constructed,
+    -- one has to make a dictionary of [offset, length] pairs of the row.
+    -- for efficiency, do one pass to count number of rows,
+    -- and another pass to create a LongTensor and fill it
+    local lookup = libcsvigo.create_lookup(data)
+
+    local out = {}
+    local separator = self.separator
+
+    local function index (tbl, i)
+        assert(i, 'index has to be given')
+        assert(i > 0 and i <= lookup:size(1), "index out of bounds: " ..  i)
+        local line = ffi.string(data:data() + lookup[i][1], lookup[i][2])
+        local entry = fromcsv(line, separator)
+        return entry
+    end
+
+    local function stringm (i)
+        assert(i, 'index has to be given')
+        assert(i > 0 and i <= lookup:size(1), "index out of bounds: " ..  i)
+        return ffi.string(data:data() + lookup[i][1], lookup[i][2])
+    end
+
+    out.mt = {}
+    out.mt.__index = index
+
+    out.mt.__newindex = function (t,k,v)
+        error("attempt to update a read-only table", 2)
+    end
+
+    out.mt.__len = function (t)
+        return lookup:size(1)
+    end
+
+    out.mt.__tostring = function(t)
+        local s = ''
+        if lookup:size(1) < 30 then
+            for i = 1, lookup:size(1) do
+                s = s .. stringm(i) .. '\n'
+            end
+        else
+            for i = 1, 10 do
+                s = s .. stringm(i) .. '\n'
+            end
+            for i = 1, 10 do
+                s = s .. '.. .. .. .. .. .. .. .. .. \n'
+            end
+            for i = lookup:size(1)-10, lookup:size(1) do
+                s = s .. stringm(i) .. '\n'
+            end
+        end
+        return s
+    end
+
+    out.mt.__ipairs = function(t)
+        local counter = 0
+        function iter()
+            counter = counter + 1
+            if counter <= lookup:size(1) then
+                return counter, index(t, counter)
+            end
+            return nil
+        end
+        return iter, t, 0
+    end
+
+    out.mt.__pairs = function(t)
+        local counter = 0
+        function iter()
+            counter = counter + 1
+            if counter <= lookup:size(1) then
+                return counter, index(t, counter)
+            end
+            return nil
+        end
+        return iter, t, nil
+    end
+
+    setmetatable(out, out.mt)
+    -- size
+    -- tostring
+
+    -- iterator
+    -- index
+    -- error on newindex
+
+    return out
 end
 
 -- return all records as an array
 -- each element of the array is an array of strings
 -- should be faster than reading record by record
-function Csv:readall(large)
-   local res
-   if large then
-       local ok, tds_ = pcall(require, 'tds')
-       if not ok then
-           error('large mode requires the tds package. '
-                     .. 'Install it via "luarocks install tds"')
-       end
-       tds = tds_
-       res = tds.Vec()
-   else
-       res = {}
+function Csv:readall(mode)
+   if mode == 'large' then
+       return self:largereadall()
    end
+   local res = {}
    while true do
       local line = self.file:read("*l")
       if not line then break end
       -- strip CR line endings
       line = line:gsub('\r', '')
       local entry = fromcsv(line, self.separator)
-      if large then
-          entry = table2tdshash(entry)
-      end
       res[#res+1] = entry
    end
    return res
