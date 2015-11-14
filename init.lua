@@ -52,17 +52,17 @@ function csvigo.load(...)
    local args, path, separator, mode, header, verbose, skip, large = dok.unpack(
       {...},
       'csvigo.load',
-      'Load a CSV file, according to the specifided mode:\n'
+      'Load a CSV file, according to the specified mode:\n'
       .. ' - raw   : no clean up, return a raw list of lists, a 1-to-1 mapping to the CSV file\n'
       .. ' - tidy  : return a clean table, where each entry is a variable that points to its values\n'
-      .. ' - query : return the tidy table, as well as query operators',
+      .. ' - query : return the tidy table, as well as query operators\n'
+      .. ' - large : returns a table that decodes rows on the fly, on indexing ',
       {arg='path',      type='string',  help='path to file', req=true},
       {arg='separator', type='string',  help='separator (one character)', default=','},
       {arg='mode',      type='string',  help='load mode: raw | tidy | query', default='tidy'},
       {arg='header',    type='boolean', help='file has a header (variable names)', default=true},
       {arg='verbose',   type='boolean', help='verbose load', default=true},
-      {arg='skip',      type='number',  help='skip this many lines at start of file', default=0},
-      {arg='large',     type='boolean', help='Set to true when loading large files', default=false}
+      {arg='skip',      type='number',  help='skip this many lines at start of file', default=0}
    )
 
    -- check path
@@ -73,12 +73,12 @@ function csvigo.load(...)
 
    -- load CSV
    vprint('parsing file: ' .. path)
-   local f = csvigo.File(path,'r',separator)
-   local loaded = f:readall(large)
+   local f = csvigo.File(path, 'r', separator)
+   local loaded = f:readall(mode)
    f:close()
 
    -- do work depending on mode
-   if mode == 'raw' then
+   if mode == 'raw' or mode == 'large' then
       -- simple, dont do anything
       vprint('parsing done')
       return loaded
