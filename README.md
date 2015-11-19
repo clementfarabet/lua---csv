@@ -15,8 +15,8 @@ The library provides 2 high-level functions: csvigo.load and csvigo.save. To get
 on these functions, simply do:
 
 ```
-> help(csvigo.save)
-> help(csvigo.load)
+> csvigo.save()
+> csvigo.load()
 ```
 
 Loading a CSV file in 'query' mode gives you a convenient query function that
