@@ -57,12 +57,13 @@ function csvigo.load(...)
       .. ' - tidy  : return a clean table, where each entry is a variable that points to its values\n'
       .. ' - query : return the tidy table, as well as query operators\n'
       .. ' - large : returns a table that decodes rows on the fly, on indexing ',
-      {arg='path',      type='string',  help='path to file', req=true},
-      {arg='separator', type='string',  help='separator (one character)', default=','},
-      {arg='mode',      type='string',  help='load mode: raw | tidy | query', default='tidy'},
-      {arg='header',    type='boolean', help='file has a header (variable names)', default=true},
-      {arg='verbose',   type='boolean', help='verbose load', default=true},
-      {arg='skip',      type='number',  help='skip this many lines at start of file', default=0}
+      {arg='path',         type='string',  help='path to file', req=true},
+      {arg='separator',    type='string',  help='separator (one character)', default=','},
+      {arg='mode',         type='string',  help='load mode: raw | tidy | query', default='tidy'},
+      {arg='header',       type='boolean', help='file has a header (variable names)', default=true},
+      {arg='verbose',      type='boolean', help='verbose load', default=true},
+      {arg='skip',         type='number',  help='skip this many lines at start of file', default=0},
+      {arg='column_order', type='boolean', help='return csv\'s column order in tidy mode', default=false}
    )
 
    -- check path
@@ -113,7 +114,12 @@ function csvigo.load(...)
       -- return tidy table
       if mode == 'tidy' then
          vprint('returning tidy table')
-         return tidy
+
+         if args.column_order then
+            return i2key,tidy
+         else
+            return tidy
+         end
       end
 
       -- query mode: build reverse index
@@ -252,12 +258,13 @@ function csvigo.save(...)
       .. ' - raw   : no clean up, return a raw list of lists, a 1-to-1 mapping to the CSV file\n'
       .. ' - tidy  : return a clean table, where each entry is a variable that points to its values\n'
       .. ' - query : return the tidy table, as well as query operators',
-      {arg='path',      type='string',  help='path to file', req=true},
-      {arg='data',      type='table',   help='table to save as a CSV file', req=true},
-      {arg='separator', type='string',  help='separator (one character)', default=','},
-      {arg='mode',      type='string',  help='table to save is represented as: raw | tidy | query', default='autodetect'},
-      {arg='header',    type='boolean', help='table has a header (variable names)', default=true},
-      {arg='verbose',   type='boolean', help='verbose load', default=true}
+      {arg='path',         type='string',  help='path to file', req=true},
+      {arg='data',         type='table',   help='table to save as a CSV file', req=true},
+      {arg='separator',    type='string',  help='separator (one character)', default=','},
+      {arg='mode',         type='string',  help='table to save is represented as: raw | tidy | query', default='autodetect'},
+      {arg='header',       type='boolean', help='table has a header (variable names)', default=true},
+      {arg='verbose',      type='boolean', help='verbose load', default=true},
+      {arg='column_order', type='table',   help='Write csv according to given column order', default=nil}
    )
 
    -- check path
@@ -305,15 +312,31 @@ function csvigo.save(...)
       local headers
       if header then
          headers = {}
-         for var in pairs(data) do
-            table.insert(headers, var)
+
+         if args.column_order then
+            for _,var in pairs(args.column_order) do
+               table.insert(headers, var)
+            end
+         else
+            for var in pairs(data) do
+               table.insert(headers, var)
+            end
          end
       end
       -- export data
-      for var,vals in pairs(data) do
-         for i,val in ipairs(vals) do
-            raw[i] = raw[i] or {}
-            table.insert(raw[i], val)
+      if args.column_order then
+         for var,vals in pairs(args.column_order) do
+            for i,val in ipairs(data[vals]) do
+               raw[i] = raw[i] or {}
+               table.insert(raw[i], val)
+            end
+         end
+      else
+         for var,vals in pairs(data) do
+            for i,val in ipairs(vals) do
+               raw[i] = raw[i] or {}
+               table.insert(raw[i], val)
+            end
          end
       end
       -- write raw data
