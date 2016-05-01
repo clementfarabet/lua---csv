@@ -23,9 +23,12 @@ local function escapeCsv(s, separator)
 end
 
 -- convert an array of strings or numbers into a row in a csv file
-local function tocsv(t, separator)
+local function tocsv(t, separator, nan_as_missing)
    local s = ""
    for _,p in pairs(t) do
+      if (nan_as_missing and p ~= p) then
+         p = ''
+      end
       s = s .. separator .. escapeCsv(p, separator)
    end
    return string.sub(s, 2) -- remove first comma
@@ -66,11 +69,12 @@ end
 local Csv = torch.class("csvigo.File")
 
 -- initializer
-function Csv:__init(filepath, mode, separator)
+function Csv:__init(filepath, mode, separator, nan_as_missing)
    local msg = nil
    self.filepath = filepath
    self.file, msg = io.open(filepath, mode)
    self.separator = separator or ','
+   self.nan_as_missing = nan_as_missing or false
    if not self.file then error(msg) end
 end
 
@@ -221,15 +225,15 @@ end
 -- convert to csv format by inserting commas and quoting where necessary
 -- return nil
 function Csv:write(a)
-   res, msg = self.file:write(tocsv(a, self.separator),"\n")
+   res, msg = self.file:write(tocsv(a, self.separator, self.nan_as_missing),"\n")
    if res then return end
    error(msg)
 end
 
 -- write all records in an array (table of tables)
-function Csv:writeall(a)
+function Csv:writeall(a, nan_as_missing)
    for i,entry in ipairs(a) do
-      res, msg = self.file:write(tocsv(entry, self.separator),"\n")
+      res, msg = self.file:write(tocsv(entry, self.separator, self.nan_as_missing),"\n")
       if not res then error(msg) end
    end
    return true

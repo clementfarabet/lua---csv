@@ -49,7 +49,7 @@ torch.include('csvigo', 'File.lua')
 -- load
 function csvigo.load(...)
    -- usage
-   local args, path, separator, mode, header, verbose, skip, large = dok.unpack(
+   local args, path, separator, mode, header, verbose, skip = dok.unpack(
       {...},
       'csvigo.load',
       'Load a CSV file, according to the specified mode:\n'
@@ -264,7 +264,8 @@ function csvigo.save(...)
       {arg='mode',         type='string',  help='table to save is represented as: raw | tidy | query', default='autodetect'},
       {arg='header',       type='boolean', help='table has a header (variable names)', default=true},
       {arg='verbose',      type='boolean', help='verbose load', default=true},
-      {arg='column_order', type='table',   help='Write csv according to given column order', default=nil}
+      {arg='column_order', type='table',   help='Write csv according to given column order', default=nil},
+      {arg='nan_as_missing', type='boolean', help='Save nan values (0/0) as missing',  default=false}
    )
 
    -- check path
@@ -275,7 +276,7 @@ function csvigo.save(...)
 
    -- save CSV
    vprint('writing to file: ' .. path)
-   local f = csvigo.File(path,'w',separator)
+   local f = csvigo.File(path,'w',separator, args.nan_as_missing)
 
    -- autodetect mode?
    if mode == 'autodetect' then
