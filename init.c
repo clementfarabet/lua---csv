@@ -42,9 +42,14 @@ static int create_lookup(lua_State* L)
 
   long offset = 0;
   for (i = 0; i < length; i++) {
-    if (data[i] == '\n') {
+    if (data[i] == '\n' || data[i] == '\r') {
       *ldata++ = offset;
       *ldata++ = i - offset;
+
+      if (data[i] == '\r') {
+        i++;
+      }
+
       offset = i+1;
     }
   }

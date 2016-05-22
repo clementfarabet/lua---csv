@@ -1,7 +1,7 @@
 
 -- test csv.File class
 
-require 'csv'
+csv = require 'csvigo'
 
 tempfilename = "csv-test-delete-me.csv"
 
@@ -19,7 +19,7 @@ function testequalarray(a, b)
    end
    for i = 1, #a do
       if a[i] ~= b[i] then
-	 testerror(a, b, string.format("for i=%d, %q not equal %q", 
+	 testerror(a, b, string.format("for i=%d, %q not equal %q",
 				       i, a[i], b[i]))
       end
    end
@@ -32,7 +32,9 @@ function testvalue(a, b)
    testerror(a, b, string.format("%q not equal %q", a, b))
 end
 
-
+function writeCrlf(file)
+  file:write('one,two,three\r\n1,2,3\r\n11,12,13')
+end
 
 -- test writing file
 function writeRecs(csvf)
@@ -84,6 +86,17 @@ csvf:close()
 csvf = csv.File(tempfilename, "r", "|")
 readRecs(csvf)
 csvf:close()
+
+-- write some \r\n line endings
+file = io.open(tempfilename, 'w')
+writeCrlf(file)
+file:close()
+
+-- read the \r\n file
+data = csv.load({ path = tempfilename, mode = "large"})
+testequalarray(data[1], {"one","two","three"})
+testequalarray(data[2], {"1","2","3"})
+testequalarray(data[3], {"11","12","13"})
 
 os.execute("rm " .. tempfilename)
 
