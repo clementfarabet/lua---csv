@@ -60,11 +60,26 @@ function csvigo.load(...)
       {arg='path',         type='string',  help='path to file', req=true},
       {arg='separator',    type='string',  help='separator (one character)', default=','},
       {arg='mode',         type='string',  help='load mode: raw | tidy | query', default='tidy'},
-      {arg='header',       type='boolean', help='file has a header (variable names)', default=true},
+      {arg='header',       type='string',  help='file has a header (variable names): true | false | auto', default='auto'},
       {arg='verbose',      type='boolean', help='verbose load', default=true},
       {arg='skip',         type='number',  help='skip this many lines at start of file', default=0},
       {arg='column_order', type='boolean', help='return csv\'s column order in tidy mode', default=false}
    )
+
+   local function checkheader(header, firstline)
+      if type(header) == 'boolean' then
+         return header
+      end
+
+      if type(header) == 'string' then
+         if header == 'auto' then
+            return (tonumber(firstline[1]) == nil)
+         end
+      else
+         -- convert to boolean
+         return not not header
+      end
+   end
 
    -- check path
    path = path:gsub('^~',os.getenv('HOME'))
@@ -91,7 +106,7 @@ function csvigo.load(...)
       local i2key = {}
       -- header?
       local start = 1 + skip
-      if header then
+      if checkheader(header, loaded[start]) then
          -- use header names
          i2key = loaded[start]
          start = start + 1
