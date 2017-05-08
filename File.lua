@@ -25,7 +25,7 @@ end
 -- convert an array of strings or numbers into a row in a csv file
 local function tocsv(t, separator, nan_as_missing)
    local s = ""
-   for _,p in pairs(t) do
+   for _,p in ipairs(t) do
       if (nan_as_missing and p ~= p) then
          p = ''
       end
