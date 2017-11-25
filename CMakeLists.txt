@@ -8,4 +8,4 @@ SET(src init.c)
 
 ADD_TORCH_PACKAGE(csvigo "${src}" "${luasrc}" "CSV Reader/Writer")
 
-TARGET_LINK_LIBRARIES(csvigo luaT TH )
+TARGET_LINK_LIBRARIES(csvigo luaT TH libluajit)
